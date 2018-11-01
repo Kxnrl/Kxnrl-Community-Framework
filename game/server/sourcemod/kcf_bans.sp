@@ -135,7 +135,7 @@ bool Util_BanClient(int admin, int target, int btype, int length, const char[] r
 
     char m_szQuery[1024];
     FormatEx(m_szQuery, 1024, "INSERT INTO kcf_bans VALUES (DEFAULT, '%s', '%s', '%s', %d, %d, %d, %d, %d, %d, '%s', '%s', -1);", steamid, ip, nickname, GetTime(), length*60, btype, KCF_Core_GetServerId(), KCF_Core_GetSrvModId(), adminUserId, adminNick, bReason);
-    
+
     DataPack pack = new DataPack();
     pack.WriteCell(admin);
     pack.WriteCell(GetClientUserId(target));
