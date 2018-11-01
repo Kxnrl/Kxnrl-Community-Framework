@@ -12,7 +12,7 @@ CREATE TABLE `kcf_admins` (
   `identity` varchar(32) DEFAULT NULL,
   `hide` tinyint(2) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`aid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 --  authorization of admin & operator
@@ -23,7 +23,7 @@ CREATE TABLE `kcf_admsrv` (
   `srv_id` smallint(5) unsigned NOT NULL DEFAULT '0',
   `mod_id` smallint(5) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 --  player analytics system
@@ -40,7 +40,7 @@ CREATE TABLE `kcf_analytics` (
   `ip` varchar(32) DEFAULT NULL,
   PRIMARY KEY (`tid`),
   UNIQUE KEY `uk_connections` (`uid`,`connect_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Anit-proxy/vpn plugin
@@ -51,7 +51,7 @@ CREATE TABLE `kcf_antiproxy` (
   `retry` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `result` tinyint(3) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`steamid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- banning
@@ -71,7 +71,7 @@ CREATE TABLE `kcf_bans` (
   `bReason` varchar(128) DEFAULT NULL,
   `bRemovedBy` int(11) NOT NULL DEFAULT '-1',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;
 
 --
 -- block players log
@@ -82,7 +82,7 @@ CREATE TABLE `kcf_blocks` (
   `ip` varchar(32) DEFAULT NULL,
   `date` int(11) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;
 
 --
 -- players list
@@ -98,7 +98,7 @@ CREATE TABLE `kcf_players` (
   `signdate` int(11) NOT NULL DEFAULT '-1',
   PRIMARY KEY (`uid`),
   UNIQUE KEY `uk_steamid` (`steamid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- servers list
@@ -112,7 +112,7 @@ CREATE TABLE `kcf_servers` (
   `rcon` varchar(32) NOT NULL DEFAULT 'Rcon Password',
   `display` tinyint(3) unsigned NOT NULL DEFAULT '1',
   PRIMARY KEY (`sid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- stats & analytics
@@ -128,4 +128,4 @@ CREATE TABLE `kcf_stats` (
   `aliveonte` int(11) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`sid`),
   UNIQUE KEY `uk_uid` (`uid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
