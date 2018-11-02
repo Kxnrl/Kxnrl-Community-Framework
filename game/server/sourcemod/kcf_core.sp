@@ -247,6 +247,8 @@ public void MySQL_UpdatePasswordCallback(Database db, DBResultSet results, const
     
     OnConfigsExecuted();
     CheckKeyValueCache();
+    
+    PrintToServer("Server Started! -> %d:%d", g_iSrvModId, g_iServerId);
 }
 
 public Action Timer_SQLQueryDelay(Handle timer, DataPack pack)

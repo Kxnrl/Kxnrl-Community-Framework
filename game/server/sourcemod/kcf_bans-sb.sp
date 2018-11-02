@@ -35,7 +35,7 @@ public int Native_SBBanPlayer(Handle plugin, int numParams)
     KCF_Bans_BanClient(admin, target, 0, length, reason);
 }
 
-public int SBAddBan(Handle plugin, int numParams)
+public int Native_SBAddBan(Handle plugin, int numParams)
 {
     int client = GetNativeCell(1);
     int length = GetNativeCell(2);
