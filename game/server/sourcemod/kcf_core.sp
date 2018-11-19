@@ -154,7 +154,12 @@ public void MySQL_OnConnected(Database db, const char[] error, int retry)
     }
 
     g_MySQL = db;
-    g_MySQL.SetCharset("utf8");
+
+    if(!g_MySQL.SetCharset("utf8mb4"))
+    {
+        LogMessage("Upgrade SM to 1.10+ to support utf8mb4");
+        g_MySQL.SetCharset("utf8");
+    }
 
     PrintToServer("Database connected!");
 
