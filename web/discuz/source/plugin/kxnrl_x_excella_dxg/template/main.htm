@@ -1,0 +1,75 @@
+<style>
+.wp {
+	width:880px !important;
+}
+.main {
+	position: relative;
+}
+.dxg-img {
+	position: absolute;
+	top: 50px;
+	right: 0;
+	background: #f4f4f4;
+	width: 200px;
+	height: 200px;
+	padding: 20px 100px 20px 20px;
+}
+.dxg-img img {
+	width: 200px;
+	height: 200px;
+}
+</style>
+<ul class="tb cl">
+    <li class="a"><a href="plugin.php?id=kxnrl_x_excella_dxg&ac=main">关联数据</a></li>
+    <li class="a"><a href="plugin.php?id=kxnrl_x_excella_dxg&ac=credits">积分兑换</a></li>
+</ul>
+<form action="plugin.php" method="get" id="transform">
+<input type="hidden" name="id" value="kxnrl_x_excella_dxg:refresh" />
+<div class="main">
+    <h1 class="mt">我的 Steam 帐号</h1>
+    <div class="dxg-img">
+    	<img src="{$dzusers[avatar_full]}"/>
+    </div>
+    <table cellspacing="0" cellpadding="0" class="dt mtm">
+        <caption>
+            <h2 class="mbm xs2">Steam 帐号信息</h2>
+        </caption>
+        <tbody>
+            <tr>
+                <td>Steam昵称</td>
+                <td>{$dzusers[name]}</td>
+            </tr>
+            <tr>
+                <td>Steam状态</td>
+                <td>{$dzusers[current]}</td>
+            </tr>
+            <tr>
+                <td>Steam等级</td>
+                <td>{$dzusers[level]}</td>
+            </tr>
+            <tr>
+                <td>Steam勋章</td>
+                <td>{$dzusers[badges]}</td>
+            </tr>
+            <tr>
+                <td>SteamID64</td>
+                <td>{$steam64}</td>
+            </tr>
+            <tr>
+                <td>SteamID32</td>
+                <td>{$steam32}</td>
+            </tr>
+            <tr>
+                <td>Steam主页</td>
+                <td><a title='Steam Profile' href='https://steamproxy.1mgou.com/profiles/{$steam64}'>steamcommunity.com/profiles/{$steam64}</a></td>
+            </tr>
+        </tbody>
+    </table>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+</div>
+
+<center style="margin-right: 300px;" ><input type="submit" class="pn pnc" value="  刷新数据  "/></center>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+</form>
