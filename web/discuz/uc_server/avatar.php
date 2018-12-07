@@ -58,16 +58,17 @@ function get_steam_avatar($uid, $size = 'middle', $type = '') {
     $size = in_array($size, array('big', 'middle', 'small')) ? $size : 'middle';
     $size = str_replace('big', '_full', $size);
     $size = str_replace('middle', '_full', $size);
-    $size = str_replace('small', '', $size);
+    $size = str_replace('small', '_medium', $size);
     $redis = new Redis();
     if($redis->connect('127.0.0.1', 4399, 1, NULL, 200)) {
         if($redis->auth('redis-password')){
             $redis->select(1);
             $redis->setOption(Redis::OPT_SERIALIZER, Redis::SERIALIZER_PHP);
             $redis->setOption(Redis::OPT_PREFIX, 'avatar_steam_');
-            $url = $redis->get(strval($uid));
-            if(strlen($url) > 10) {
-                $avatar = str_replace('.jpg', $size . '.jpg', $url);
+            $data = $redis->get(strval($uid));
+            if(strlen($data) > 17) {
+                $json = json_decode($data, true);
+                $avatar = str_replace('.jpg', $size . '.jpg', $json['avatar']);
                 return $avatar;
             }
         }

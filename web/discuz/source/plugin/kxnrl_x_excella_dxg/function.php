@@ -146,14 +146,14 @@ function UpdateSteamProfiles($rds, $apikey, $steamid, $uid)
 
     DB::query("UPDATE dxg_users SET lastupdate = '".time()."', nickname = '".$array['E_nick']."', level = '".$array['levels']."', badges = '".$array['badges']."', avatar = '".$array['E_avatar']."', current = '".$array['E_current']."', gameid = '".$array['gameid']."' WHERE uid = '".$uid."'");
 
-    if(!UpdateSteamAvatar($uid, $array['avatar'])) {
+    if(!UpdateSteamAvatar($uid, $array)) {
         LogMessage("Update Avatar -> " . $uid . " -> " . $array['avatar']);
     }
 
     return true;
 }
 
-function UpdateSteamAvatar($uid, $avatar)
+function UpdateSteamAvatar($uid, $array)
 {
     $key = strval($uid);
     $redis = new Redis();
@@ -164,9 +164,15 @@ function UpdateSteamAvatar($uid, $avatar)
             $redis->setOption(Redis::OPT_PREFIX, 'avatar_steam_');
             if($redis->exists($key)) {
                 $redis->delete($key);
-            }
-            $redis->set($key, $avatar, array('nx', 'ex'=>86400));
-            return true;
+            }   
+            $data = array (
+                'steamid'  => $array['steam'],
+                'avatar'   => $array['avatar'],
+                'nickname' => $array['nickname'],
+                'levels'   => $array['level'],
+                'state'    => $array['state']
+            );
+            return $redis->set($key, json_encode($data), array('nx', 'ex'=>86400));
         }
     }
     return false;
