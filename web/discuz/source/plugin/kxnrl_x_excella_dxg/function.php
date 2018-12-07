@@ -54,6 +54,8 @@ function UpdateSteamProfiles($rds, $apikey, $steamid, $uid)
     curl_close($curl);
 
     $json = json_decode($data, true);
+    
+    $array['public'] = true;
 
     foreach($json as $key => $value)
     {
@@ -81,51 +83,68 @@ function UpdateSteamProfiles($rds, $apikey, $steamid, $uid)
                 }
             }elseif($v['communityvisibilitystate'] == 1){
                 $array['state'] = "Private Profile";
+                $array['public'] = false;
+            }else{
+                $array['state'] = "Unknow";
+                $array['public'] = false;
             }
+            break;
         }
     }
-    
+
     if($steamid != $array['steam']){
         LogMessage("SteamID ERROR (".$steamid." : ".$array['steam'].")");
         return false;
     }
-
-    // Get Badges (level, badges)
-    $url = "https://api.steampowered.com/IPlayerService/GetBadges/v1/?key=$apikey&format=json&steamid=$steamid";
-    $curl = curl_init();
-    curl_setopt($curl, CURLOPT_URL, $url);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($curl, CURLOPT_HEADER, 0);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-    $data = curl_exec($curl);
-    curl_close($curl);
     
-    $json = json_decode($data, true);
+    $array['badges'] = 0;
+    $array['levels'] = 0;
 
-    foreach($json as $key => $value)
-    {
-        $array['badges'] = 0;
-        $array['levels'] = $value['player_level'];
-        if($value['player_level'] != null){
-            foreach($value['badges'] as $k => $v)
-            {
-                $array['badges']++;
+    if($array['public']) {
+
+        // Get Badges (level, badges)
+        $url = "https://api.steampowered.com/IPlayerService/GetBadges/v1/?key=$apikey&format=json&steamid=$steamid";
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($curl, CURLOPT_HEADER, 0);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        $data = curl_exec($curl);
+        curl_close($curl);
+        
+        $json = json_decode($data, true);
+
+        foreach($json as $key => $value)
+        {
+            $array['badges'] = 0;
+            $array['levels'] = $value['player_level'];
+            if($value['player_level'] != null){
+                foreach($value['badges'] as $k => $v)
+                {
+                    $array['badges']++;
+                }
             }
         }
     }
     
-    LogMessage("nick[" . $array['nick'] . "] avatar[" . $array['avatar'] . "] state[" . $array['state'] . "]");
+    if(!isset($array['nick']) || empty($array['nick']) || strlen($array['nick']) < 2) {
+        $array['nick'] = 'unnamed';
+    }
+    
+    if(!isset($array['avatar']) || empty($array['avatar']) || strlen($array['avatar']) < 20) {
+        $array['avatar'] = 'https://media.st.dl.bscstorage.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb.jpg';
+    }
+    
+    if(!isset($array['state']) || empty($array['state']) || strlen($array['state']) < 3) {
+        $array['state'] = 'unknow';
+    }
 
     $array['nick'] = str_replace(array('&','<','>'),array('&amp;','&lt;','&gt;'), $array['nick']);
     $array['E_nick'] = $rds->real_escape_string($array['nick']);
     $array['E_avatar'] = $rds->real_escape_string($array['avatar']);
     $array['E_current'] = $rds->real_escape_string($array['state']);
 
-    LogMessage("E_nick[" . $array['E_nick'] . "] E_avatar[" . $array['E_avatar'] . "] E_current[" . $array['E_current'] . "]");
-
     DB::query("UPDATE dxg_users SET lastupdate = '".time()."', nickname = '".$array['E_nick']."', level = '".$array['levels']."', badges = '".$array['badges']."', avatar = '".$array['E_avatar']."', current = '".$array['E_current']."', gameid = '".$array['gameid']."' WHERE uid = '".$uid."'");
-    
-    $rds->query("update dxg_users set nickname = '1' where uid = 120");
 
     if(!UpdateSteamAvatar($uid, $array['avatar'])) {
         LogMessage("Update Avatar -> " . $uid . " -> " . $array['avatar']);
