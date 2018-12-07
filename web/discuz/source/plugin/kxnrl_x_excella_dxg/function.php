@@ -168,8 +168,8 @@ function UpdateSteamAvatar($uid, $array)
             $data = array (
                 'steamid'  => $array['steam'],
                 'avatar'   => $array['avatar'],
-                'nickname' => $array['nickname'],
-                'levels'   => $array['level'],
+                'nickname' => htmlspecialchars(xss_clean($array['nick'])),
+                'levels'   => $array['levels'],
                 'state'    => $array['state']
             );
             return $redis->set($key, json_encode($data), array('nx', 'ex'=>86400));
