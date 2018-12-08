@@ -85,7 +85,7 @@ function UpdateSteamProfiles($rds, $apikey, $steamid, $uid)
                 $array['state'] = "Private Profile";
                 $array['public'] = false;
             }else{
-                $array['state'] = "Unknow";
+                $array['state'] = "Offline";
                 $array['public'] = false;
             }
             break;
@@ -96,7 +96,7 @@ function UpdateSteamProfiles($rds, $apikey, $steamid, $uid)
         LogMessage("SteamID ERROR (".$steamid." : ".$array['steam'].")");
         return false;
     }
-    
+
     $array['badges'] = 0;
     $array['levels'] = 0;
 
@@ -170,7 +170,8 @@ function UpdateSteamAvatar($uid, $array)
                 'avatar'   => $array['avatar'],
                 'nickname' => htmlspecialchars(xss_clean($array['nick'])),
                 'levels'   => $array['levels'],
-                'state'    => $array['state']
+                'state'    => $array['state'],
+                'gameid'   => $array['gameid']
             );
             return $redis->set($key, json_encode($data), array('nx', 'ex'=>86400));
         }
