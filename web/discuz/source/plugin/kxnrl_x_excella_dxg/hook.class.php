@@ -57,12 +57,12 @@ class plugin_kxnrl_x_excella_dxg_forum extends plugin_kxnrl_x_excella_dxg {
             }
 
             $data = json_decode($json, true);
-            
+
             if(isset($data['gameid']) && intval($data['gameid']) > 0){
                 $data['appid'] = 'https://store.steampowered.com/app/' . $data['gameid'];
                 $data['gameu'] = '<a class="steam_user_bar_game" href="' . $data['appid'] . '" target="_blank">' . $data['state'] . '</a>';
             } else {
-                $data['gameu'] = '<span style="color: #EEDFCC;">' . $data['state'] . '</span>';
+                $data['gameu'] = '<span class="steam_user_bar_offl">' . $data['state'] . '</span>';
             }
 
             $results[] =
