@@ -6,13 +6,14 @@ if(!defined('IN_DISCUZ')){
 
 $logsnum = 0;
 $itemnum = 0;
+$datardy = false;
 
 if(($result = $rds->query("SELECT * FROM store_players WHERE authid='$steamid'")) && ($row = $result->fetch_array())){
 
     $storeid = $row['id'];
     $credits = $row['credits'];
 
-    if($storeid > 0){
+    if($storeid > 0) {
 
         if($coinnum < 0 && $credits > 0){
             
@@ -69,9 +70,16 @@ if(($result = $rds->query("SELECT * FROM store_players WHERE authid='$steamid'")
         
         if($result3 = $rds->query("SELECT * FROM store_items WHERE player_id=$storeid")){
             
-            $itemnum = $result3->$num_rows;
+            $itemnum = 0; //$result3->$num_rows;
+            while($result3->fetch_array())
+            {
+                $itemnum++;
+            }
 
         }
+        
+        $datardy = true;
+        
     }else{
         
         showmessage("请您先进入一次服务器", 'plugin.php?id=kxnrl_x_excella_dxg');

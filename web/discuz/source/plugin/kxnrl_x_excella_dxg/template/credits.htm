@@ -37,9 +37,11 @@
     /* border: 6px solid #F3F5F8; */
 }
 </style>
+<!--{if $datardy }-->
 <ul class="tb cl">
     <li><a href="plugin.php?id=kxnrl_x_excella_dxg&ac=main">关联数据</a></li>
     <li class="a"><a href="plugin.php?id=kxnrl_x_excella_dxg&ac=credits">积分兑换</a></li>
+    <li><a href="plugin.php?id=kxnrl_x_excella_dxg&ac=store">在线商店(BETA)</a></li>
 </ul>
 <ul class="creditl mtm bbda cl">
     <p>&nbsp;</p>
@@ -81,7 +83,7 @@
 </form>
 <div class="memberlist">
     <h2>
-        最近游戏内信用点变更记录 ({$logsnum}条)
+        最近(30天内)游戏内积分变更记录 ({$logsnum}条)
     </h2>
 </div>
 <div class="box_div" id="recordlist" style="padding-top: 0px;padding-right: 0px;margin-bottom: 50px;">
@@ -108,3 +110,6 @@
         </tbody>
     </table>
 </div>
+<!--{else}-->
+数据不可用
+<!--{/if}-->
