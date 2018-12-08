@@ -29,7 +29,7 @@
 <div class="main">
     <h1 class="mt">我的 Steam 帐号</h1>
     <div class="dxg-img">
-    	<img src="{$dzusers[avatar_full]}"/>
+    	<a title='Steam Profile' href='https://steam.1mgou.com/profiles/{$steam64}' target='_blank'><img src="{$dzusers[avatar_full]}"/></a>
     </div>
     <table cellspacing="0" cellpadding="0" class="dt mtm">
         <caption>
@@ -62,15 +62,16 @@
             </tr>
             <tr>
                 <td>Steam主页</td>
-                <td><a title='Steam Profile' href='https://steamproxy.1mgou.com/profiles/{$steam64}'>steamcommunity.com/profiles/{$steam64}</a></td>
+                <td><a title='Steam Profile' href='https://steam.1mgou.com/profiles/{$steam64}' target='_blank'>steamcommunity.com/profiles/{$steam64}</a></td>
             </tr>
         </tbody>
     </table>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 </div>
-
+<!--{if $updated > 1 }-->
 <center style="margin-right: 300px;" ><input type="submit" class="pn pnc" value="  刷新数据  "/></center>
+<!--{/if}-->
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 </form>

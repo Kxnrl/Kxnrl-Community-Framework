@@ -26,6 +26,8 @@ if(!$rds) {
     showmessage('数据库发生异常错误了.', 'forum.php');
 }
 
+$updated = 0;
+
 if($dzusers['steamid']){
 
     $dzusers['name'] = htmlspecialchars(xss_clean($dzusers['nickname']));
@@ -33,10 +35,16 @@ if($dzusers['steamid']){
     $steam64 = $dzusers['steamid'];
     $steam32 = SteamID64ToSteamID32($steam64, true);
     $steamid = SteamID64ToSteamID32($steam64, false);
+    
+    $updated++;
 
     if(($dzusers['lastupdate'] < time()-1800) && UpdateSteamProfiles($rds, $api_key, $steam64, $_G['uid'])){
 
         showmessage('已更新您的Steam账户数据', 'plugin.php?id=kxnrl_x_excella_dxg');
+
+    } elseif($dzusers['lastupdate'] > time()-180) {
+
+        $updated++;
 
     }
 
