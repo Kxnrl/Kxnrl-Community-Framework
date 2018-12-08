@@ -1,0 +1,140 @@
+<style>
+.wp {
+	width:950px !important;
+}
+::-webkit-input-placeholder { /* WebKit browsers */
+　　color:#ccc;
+}
+:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+　　color:#ccc;
+}
+::-moz-placeholder { /* Mozilla Firefox 19+ */
+　　color:#ccc;
+}
+:-ms-input-placeholder { /* Internet Explorer 10+ */
+　　color:#ccc;
+}
+.memberlist {
+    background: url(/source/plugin/addon_kuang/images/title_bg.gif) repeat scroll 0 0;
+    position: relative;
+    margin-top: 20px;
+}
+.memberlist h2 {
+    background: url(/source/plugin/addon_kuang/images/title.gif) no-repeat scroll 0 0;
+    padding-left: 35px;
+    height: 30px;
+    border: 0px;
+    height: 30px;
+    line-height: 30px;
+    padding-left: 30px;
+    font-size: 14px;
+    color: #666;
+}
+.box_div {
+    line-height: 25px;
+    padding: 10px 0;
+    margin-bottom: 10px;
+    /* border: 6px solid #F3F5F8; */
+}
+</style>
+<ul class="tb cl">
+    <li><a href="plugin.php?id=kxnrl_x_excella_dxg&ac=main">关联数据</a></li>
+    <li><a href="plugin.php?id=kxnrl_x_excella_dxg&ac=credits">积分兑换</a></li>
+    <li class="a"><a href="plugin.php?id=kxnrl_x_excella_dxg&ac=store">在线商店(BETA)</a></li>
+</ul>
+<ul class="creditl mtm bbda cl">
+    <p>&nbsp;</p>
+    <li>当前 <strong>论坛</strong> 龙币:  {$coinnum}</li>
+    <li>当前 <strong>游戏</strong> 积分:  {$credits} </li>
+    <li><strong>StoreID</strong>:  {$storeid} </li>
+    <li>物品数量:  {$itemnum} </li>
+    <p>&nbsp;</p>
+</ul>
+<div class="memberlist">
+    <h2>
+        库存物品 (共计<font color='orange'><b></b>{$itemnum}</b></font>个 | 总价<font color='Magenta'><b>{$alprice}</b></font>龙币)
+    </h2>
+</div>
+<div class="box_div" id="recordlist" style="padding-top: 0px;padding-right: 0px;margin-bottom: 50px;">
+    <table cellspacing="0" cellpadding="0" class="dt ">
+        <tbody>
+            <tr>
+                <th width="5"></th>
+                <th width="40"><b>物品ID</b></th>
+                <th width="40"><b>物品类型</b></th>
+                <th width="40"><b>物品名称</b></th>
+                <th width="40"><b>装备槽位</b></th>
+                <th width="40"><b>获得时间</b></th>
+                <th width="40"><b>到期时间</b></th>
+                <th width="40"><b>剩余时间</b></th>
+                <th width="40"><b>购买价格</b></th>
+                <th width="40"><b>执行操作</b></th>
+            </tr>
+            <!--{loop $Data_Client $row}-->
+            <tr>
+                <td> </td>
+                <td>{$row['id']}</td>
+                <td>{$row['parent']}</td>
+                <td>{$row['name']}</td>
+                <td>{$row['slot']}</td>
+                <td>{$row['achieve']}</td>
+                <td>{$row['expired']}</td>
+                <td>{$row['remaning']}</td>
+                <td>{$row['price']}</td>
+                <td>
+                    <form action="plugin.php" method="get" id="transform">
+                        <input type="hidden" name="id" value="kxnrl_x_excella_dxg:store" />
+                        <input type="hidden" name="itemid" id="itemid" value="{$row[itemid]}" />
+                        <label>
+                            <select name="type" id="type_{$row[itemid]}">
+                                <!--{if $row[price_of_purchase] > 1000}-->
+                                <option value="sell">快速卖出</option>
+                                <!--{/if}-->
+                                <!--{if $row[gift]}-->
+                                <option value="gift">赠送他人</option>
+                                <!--{/if}-->
+                                <!--{if $row[itemid] > 0}-->
+                                <option value="dele">删除物品</option>
+                                <!--{else}-->
+                                <option value="none">不可操作</option>
+                                <!--{/if}-->
+                            </select>
+                        </label>
+                        <!--{if $row[itemid] > 0}-->
+                        <input type="submit" onclick="javascript:return confirmAction('{$row[name]}', '$row[itemid]')" class="pn pnc" value=" 执行 " />
+                        <!--{else}-->
+                        <input type="submit" disabled="disabled" class="pn pnc" value=" 执行 " />
+                        <!--{/if}-->
+                    </form>
+                </td>
+            </tr>
+            <!--{/loop}-->
+        </tbody>
+    </table>
+</div>
+
+<p>&nbsp;</p>
+
+<script> 
+function confirmAction(name, itemid){
+
+    var select = document.getElementById("type_"+itemid);
+    var values = select.options[select.selectedIndex].value;
+
+    var msg;
+
+    switch(values)
+    {
+        case "sell": msg = "你确定要卖出["+name+"]吗?\n这个操作是不可逆的!\n ";break;
+        case "dele": msg = "你确定要删除["+name+"]吗?\n这个操作是不可逆的!\n ";break;
+        case "gift": msg = "你确定要赠送["+name+"]吗?\n这个操作是不可逆的!\n ";break;
+        default: return false;
+    }
+
+    if(confirm(msg)==true){ 
+        return true; 
+    }else{ 
+        return false; 
+    }
+}
+</script> 
