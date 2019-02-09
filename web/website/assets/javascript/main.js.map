@@ -1,0 +1,130 @@
+var err = 0;
+var day = 0;
+var crt = 4399;
+var servers = new Array();
+
+window.onload=function() {
+
+    initServers();
+
+    // https://stackoverflow.com/questions/4565112/javascript-how-to-find-out-if-the-user-browser-is-chrome
+    var ua = {
+
+        isAndroid: /Android/.test(navigator.userAgent),
+        isCordova: !!window.cordova,
+        isEdge: /Edge/.test(navigator.userAgent),
+        isFirefox: /Firefox/.test(navigator.userAgent),
+        isChrome: /Google Inc/.test(navigator.vendor),
+        isChromeIOS: /CriOS/.test(navigator.userAgent),
+        isChromiumBased: !!window.chrome && !/Edge/.test(navigator.userAgent),
+        isIE: /Trident/.test(navigator.userAgent),
+        isIOS: /(iPhone|iPad|iPod)/.test(navigator.platform),
+        isOpera: /OPR/.test(navigator.userAgent),
+        isSafari: /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent),
+        isTouchScreen: ('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch,
+        isWebComponentsSupported: 'registerElement' in document && 'import' in document.createElement('link') && 'content' in document.createElement('template')
+    };
+
+    if (!ua.isChrome && !ua.isChromeIOS && !ua.isIOS) {
+
+        // https://stackoverflow.com/questions/9419263/playing-audio-with-javascript
+        var audio = document.createElement('audio');
+        audio.style.display = "none";
+        audio.src = "//music.kxnrl.com/musics/netease/29819851.mp3";
+        audio.autoplay = false;
+        audio.loop = true;
+        document.body.appendChild(audio);
+        audio.play();
+    }
+};
+
+function initServers() {
+
+    getServers();
+    setInterval(refresh, 1000);
+}
+
+function refresh() {
+
+    if (crt == 4399) {
+        $("#countdown").html("Refreshing in ∞ seconds");
+        return false;
+    }
+
+    if (crt == 4357) {
+        $("#countdown").html("Refreshing...");
+        return false;
+    }
+
+    crt--;
+
+    if (crt == 0) {
+        crt = 4357;
+        getServers();
+        return false;
+    }
+
+    $("#countdown").html("Refreshing in " + crt + " seconds");
+
+    return true;
+}
+
+function getServers() {
+
+    $("#countdown").html("Refreshing...");
+
+    $.getJSON("//api.kxnrl.com/ICommunityServersStatus/v1/?secert=unencrypted&utm_src=magicgirl", function(result) {
+
+        // 缓冲
+        //$("#loading-notice").remove();
+
+        if (result.reload)
+            setTimeout(function() { location.reload(true) }, 1000);
+
+        // foreach
+        for (var i = 0; i < result.servers.length; ++i) {
+            var tableRow = $("#serversList tr#r" + i);
+            if (!tableRow.length) {
+                $("#serversList").append(
+                    '<tr id="r' + i + '">'                                                                                       +
+                    '<td id="ttl"> </td>'                                                                                        +
+                    '<td id="mod"></td>'                                                                                         +
+                    '<td id="vac"></td>'                                                                                         +
+                    '<td id="srv"></td>'                                                                                         +
+                    '<td id="map"></td>'                                                                                         +
+                    '<td id="gmp"></td>'                                                                                         +
+                    '<td id="ply"></td>'                                                                                         +
+                    '<td id="act"><a href="steam://connect/' + result.servers[i].adr + '" class="btn btn-success btn-sm"><i class="fa fa-steam fa-1g" aria-hidden="true"></i> Connect</a></td>' +
+                    '</tr>'
+                )
+                tableRow = $("#serversList tr#r" + i);
+                servers[i] = true;
+            }
+            tableRow = tableRow[0];
+            
+            if (result.servers[i].err) {
+                tableRow.setAttribute('class', 'bg-danger');
+            } else {
+                tableRow.setAttribute('class', 'bg-info');
+            }
+            
+            tableRow.children["mod"].innerHTML = '<img src="assets/image/' + result.servers[i].mod + '.png" width="24" height="24" />';
+            tableRow.children["vac"].innerHTML = '<img src="assets/image/' + result.servers[i].vac + '.png" width="24" height="24" />';
+
+            tableRow.children["srv"].innerHTML = result.servers[i].srv;
+            tableRow.children["map"].innerHTML = result.servers[i].map;
+            tableRow.children["gmp"].innerHTML = result.servers[i].gmp;
+            
+            tableRow.children["srv"].setAttribute('style', 'text-align: left');
+            tableRow.children["map"].setAttribute('style', 'text-align: left');
+
+            tableRow.children["ply"].innerHTML = result.servers[i].ply.current + " / " + result.servers[i].ply.maximum;
+        }
+        crt = 45;
+        err = 0;
+    }).fail(function(update_error) {
+        crt = 9;
+        err = 1;
+        console.log("Failed to ajax getJSON: " + update_error);
+    });
+}
