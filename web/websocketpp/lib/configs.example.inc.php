@@ -11,6 +11,8 @@ $_config['mysql']['user'] = '';
 $_config['mysql']['pswd'] = '';
 $_config['mysql']['db']['forum'] = '';
 $_config['mysql']['db']['kxnrl'] = '';
+$_config['sckey'] = '';
+$_config['pwkey'] = '';
 
 require_once 'forum.class.php';
 require_once 'kxnrl.class.php';

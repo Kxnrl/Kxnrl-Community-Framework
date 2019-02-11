@@ -787,7 +787,7 @@ EOF
             return array('pid' => $p);
         }
 
-        $r = $this->fetchFirst('kcf_players', 'pid', $p);
+        $r = $this->fetchFirst('kcf_ins_pvp_skill', 'pid', $p);
 
         if (!$r) {
 

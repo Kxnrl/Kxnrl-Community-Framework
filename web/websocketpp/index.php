@@ -4,7 +4,6 @@ define('websocket_server_kxnrl', '~~~~~~~~', true);
 
 ini_set("mysqli.reconnect", "On");
 
-$secret = '8ec6de25df5af4f6acd9d14ebe2cbd7b';
 $authed = array();
 $global = array();
 
@@ -46,11 +45,10 @@ EOT;
     );
 
     $curl = curl_init();
-    curl_setopt($curl, CURLOPT_URL, "https://sc.ftqq.com/SCU42985T125e517b86b1b93122841c377392804a5c48caac4517e.send");
+    curl_setopt($curl, CURLOPT_URL, "https://sc.ftqq.com/" . $_config['sckey'] . ".send");
     curl_setopt($curl, CURLOPT_POST, true);
     curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-    //curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($curl, CURLOPT_POSTFIELDS, $form);
     curl_exec($curl);
     curl_close($curl);
@@ -173,7 +171,7 @@ EOT;
     );
 
     $curl = curl_init();
-    curl_setopt($curl, CURLOPT_URL, "https://sc.ftqq.com/SCU42985T125e517b86b1b93122841c377392804a5c48caac4517e.send");
+    curl_setopt($curl, CURLOPT_URL, "https://sc.ftqq.com/" . $_config['sckey'] . ".send");
     curl_setopt($curl, CURLOPT_POST, true);
     curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
@@ -191,7 +189,7 @@ EOT;
 
 $server->on('message', function(swoole_websocket_server $_server, $frame) {
     
-    global $authed, $secret, $global;
+    global $authed, $global, $_config;
 
     //if ($frame->opcode == )
 
@@ -201,7 +199,7 @@ $server->on('message', function(swoole_websocket_server $_server, $frame) {
     $recv = $frame->data;
     if (!isset($authed[$frame->fd]['verify']) || !$authed[$frame->fd]['verify'])
     {
-        if (strcmp($recv, $secret) != 0)
+        if (strcmp($recv, $_config['pwkey']) != 0)
         {
             _sprintf("Message Auth: '{$recv}' X");
             $_server->close($frame->fd, false);
@@ -511,7 +509,7 @@ $server->on('message', function(swoole_websocket_server $_server, $frame) {
 });
 
 $server->on('open', function(swoole_websocket_server $_server, swoole_http_request $request) {
-    global $authed, $secret;
+    global $authed;
     $authed[$request->fd]['verify'] = false;
     $r = 0;
     foreach ($_server->connections as $c)
@@ -524,7 +522,7 @@ $server->on('open', function(swoole_websocket_server $_server, swoole_http_reque
 });
 
 $server->on('close', function($_server, $fd) {
-    global $authed, $secret;
+    global $authed;
     unset($authed[$fd]);
     $r = 0;
     foreach ($_server->connections as $c)
