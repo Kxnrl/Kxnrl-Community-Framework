@@ -27,7 +27,7 @@ function _log($l, $p = true) {
 
 function _push($e) {
 
-    global $global;
+    global $global, $_config;
     $t = date("Y-m-d H:i:s", time());
     $d = 
 <<<EOT
@@ -49,6 +49,32 @@ EOT;
     curl_setopt($curl, CURLOPT_POST, true);
     curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($curl, CURLOPT_POSTFIELDS, $form);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_exec($curl);
+    curl_close($curl);
+}
+
+function _msg($m) {
+
+    global $global, $_config;
+    $t = date("Y-m-d H:i:s", time());
+    $d = <<<EOT
+时间: $t  
+消息: $m
+EOT;
+
+    $form = array(
+        'text' => 'Websocket.service',
+        'desp' => $d
+    );
+
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_URL, "https://sc.ftqq.com/" . $_config['sckey'] . ".send");
+    curl_setopt($curl, CURLOPT_POST, true);
+    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($curl, CURLOPT_POSTFIELDS, $form);
     curl_exec($curl);
     curl_close($curl);
@@ -156,30 +182,22 @@ try {
     $global['kxnrl'] = new Kxnrl();
   //$global['forum'] = new Forum();
     $global['timeQ'] = time();
+    $global['isBot'] = -1;
 
     $server = new swoole_websocket_server("127.0.0.1", 420);
 
-    $time = date("Y-m-d H:i:s", time());
-    $desp = <<<EOT
-时间: $time  
-消息: Websocket服务启动成功...  
-EOT;
-
-    $form = array(
-        'text' => 'Websocket.service',
-        'desp' => $desp
+    $server->set(
+        [
+            'buffer_output_size' => 16 * 1024 * 1024,
+            'socket_buffer_size' => 64 * 1024 * 1024,
+            'max_connection' => 100,
+            'reactor_num' => 4,
+            'worker_num' => 4,
+            'tcp_fastopen' => true,
+        ]
     );
 
-    $curl = curl_init();
-    curl_setopt($curl, CURLOPT_URL, "https://sc.ftqq.com/" . $_config['sckey'] . ".send");
-    curl_setopt($curl, CURLOPT_POST, true);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($curl, CURLOPT_POSTFIELDS, $form);
-    curl_exec($curl);
-    curl_close($curl);
-
-    print_r(PHP_EOL);
+    _msg("Websocket服务启动成功...");
 
 } catch (Exception $e) {
 
@@ -328,6 +346,46 @@ $server->on('message', function(swoole_websocket_server $_server, $frame) {
 
         case Message_Type::Broadcast_QQBot:
             // 酷Q机器人
+            switch ($array['Message_Data']['type'])
+            {
+                case "toGroup":
+                    foreach ($_server->connections as $fd)
+                    {
+                        if ($global['isBot'] == $fd)
+                        {
+                            $_server->push($fd, $frame->data);
+                        }
+                    }
+                    break;
+                case "toServer":
+                    foreach ($_server->connections as $fd)
+                    {
+                        if ($global['isBot'] != $fd)
+                        {
+                            $_server->push($fd, $frame->data);
+                        }
+                    }
+                    break;
+                case "oAuth":
+                    if (strcmp($array['Message_Data']['data'], "CQPBot") == 0) {
+                        
+                        $global['isBot'] = $frame->fd;
+
+                        _sprintf("CQPBot connected.");
+                        _msg("CQPBot connected.");
+
+                        $ret = json_encode(
+                            array(
+                                'err' => 0,
+                                'msg' => "WebSocket connected."
+                            ),
+                            true
+                        );
+
+                        $_server->push($frame->fd, $ret);
+                    }
+                    break;
+            }
             break;
 
         case Message_Type::Broadcast_Wedding:
@@ -522,7 +580,7 @@ $server->on('open', function(swoole_websocket_server $_server, swoole_http_reque
 });
 
 $server->on('close', function($_server, $fd) {
-    global $authed;
+    global $global, $authed;
     unset($authed[$fd]);
     $r = 0;
     foreach ($_server->connections as $c)
@@ -532,6 +590,13 @@ $server->on('close', function($_server, $fd) {
     _sprintf("=============[OnClose]=============");
     _sprintf("Connection close: {$fd}");
     _sprintf("Total connection: {$r}");
+
+    if ($global['isBot'] == $fd) {
+
+        $global['isBot'] = -1;
+
+        _msg("CQPBot disconnected.");
+    }
 });
 
 $server->start();
