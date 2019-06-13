@@ -546,6 +546,65 @@ EOF
         );
     }
 
+    public function Vip_LoadUser($p) {
+
+        $p = intval($p);
+        $s = 0;
+        $e = time() - 1;
+        $l = 0;
+
+        if ($result = $this->db->query("SELECT * FROM `kcf_vip` WHERE `expired` > UNIX_TIMESTAMP() WHERE `pid` = '$p' LIMIT 1;")) {
+
+            if ($row = $result->fetch_array(MYSQLI_ASSOC)) {
+                
+                $s = intval($row['started']);
+                $e = intval($row['expired']);
+                $l = intval($row['level']);
+            }
+
+            $result->free();
+
+            return array(
+                'pid'   => $p,
+                'sta'   => $s,
+                'end'   => $e,
+                'lvl'   => $l,
+                'err'   => 'none'
+            );
+        }
+
+        _log("Vip_LoadUser: " . $this->db->error);
+
+        return array(
+            'pid'   => $p,
+            'sta'   => $s,
+            'end'   => $e,
+            'lvl'   => $l,
+            'err'   => 'null results'
+        );
+    }
+
+    public function Vip_LoadAll() {
+
+        if ($result = $this->db->query("SELECT * FROM `kcf_vip` WHERE `expired` > UNIX_TIMESTAMP();")) {
+
+            $ret = array();
+
+            while ($row = $result->fetch_array(MYSQLI_ASSOC))
+            {
+                $ret[] = $row;
+            }
+
+            $result->free();
+
+            return $ret;
+        }
+
+        _log("Vip_LoadAll: " . $this->db->error);
+
+        return array();
+    }
+
     public function Stats_LoadUser($s) {
 
         $s = intval($s);

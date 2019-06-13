@@ -8,6 +8,7 @@ $authed = array();
 $global = array();
 
 require_once __DIR__ . '/lib/' . 'configs.inc.php';
+require_once __DIR__ . '/lib/' . 'message.inc.php';
 
 function _sprintf($p) {
 
@@ -57,7 +58,7 @@ EOT;
 
 function _msg($m) {
 
-    global $global, $_config;
+    global $_config;
     $t = date("Y-m-d H:i:s", time());
     $d = <<<EOT
 时间: $t  
@@ -80,100 +81,7 @@ EOT;
     curl_close($curl);
 }
 
-class Message_Type
-{
-    const Invalid = 0;
 
-    /* Global */
-
-    // Connections
-    const PingPong = 1;
-    const Disconnect = 2;
-
-    // Servers
-    const Server_Load         = 101;
-    // deprecated
-    //const Server_Update       = 102;
-    const Server_Start        = 103;
-    const Server_StartMap     = 104;
-    const Server_EndMap       = 105;
-    const Server_Query        = 106;
-
-    // Forums
-    const Forums_LoadUser     = 201;
-    const Forums_LoadAll      = 202;
-
-    // Broadcast
-    const Broadcast_Chat      = 301;
-    const Broadcast_Admin     = 302;
-    const Broadcast_QQBot     = 303;
-    const Broadcast_Wedding   = 304;
-    const Broadcast_Other     = 305;
-
-    // Baning
-    const Ban_LoadAdmins      = 401;
-    const Ban_LoadAllBans     = 402;
-    const Ban_CheckUser       = 403;
-    const Ban_InsertIdentity  = 404;
-    const Ban_InsertComms     = 405;
-    const Ban_UnbanIdentity   = 406;
-    const Ban_UnbanComms      = 407;
-    const Ban_RefreshAdmins   = 408;
-    const Ban_LogAdminAction  = 409;
-    const Ban_LogBlocks       = 410;
-
-    // Couples
-    const Couple_LoadAll      = 501;
-    const Couple_LoadUser     = 502;
-    const Couple_Update       = 503;
-    const Couple_Wedding      = 504;
-    const Couple_Divorce      = 505;
-    const Couple_MarriageSeek = 506;
-
-    /* Analytics */
-    
-    // Global
-    const Stats_LoadUser      = 1001;
-    const Stats_Analytics     = 1002;
-    const Stats_Update        = 1003;
-    const Stats_DailySignIn   = 1004; // todo
-
-    // CSGO->MiniGames
-    const Stats_MG_LoadUser   = 1101;
-    const Stats_MG_Update     = 1102;
-    const Stats_MG_Session    = 1103;
-    const Stats_MG_Trace      = 1104;
-    const Stats_MG_Ranking    = 1105;
-    const Stats_MG_Details    = 1106;
-
-    // CSGO->ZombieEscape
-    const Stast_ZE_LoadUser   = 1111;
-    const Stast_ZE_Update     = 1112;
-    const Stats_ZE_Session    = 1113;
-    const Stats_ZE_Ranking    = 1114;
-    const Stats_ZE_Details    = 1115;
-
-    // CSGO->TTT
-    const Stats_TT_LoadUser   = 1121;
-    const Stats_TT_Update     = 1122;
-    const Stats_TT_Session    = 1123;
-
-    // L4D2->V
-    const Stats_L2_LoadUser   = 1201;
-    const Stats_L2_Update     = 1202;
-    const Stats_L2_Session    = 1203;
-
-    // INS->PVP
-    const Stats_IS_LoadUser   = 1301;
-    const Stats_IS_Update     = 1302;
-    const Stats_IS_Session    = 1303;
-    const Stats_IS_Ranking    = 1304;
-    const Stats_IS_Trace      = 1305;
-    const Stats_IS_LoadAll    = 1306;
-
-    // End
-    const MaxMessage          = 2000;
-};
 
 _sprintf("Starting WebSocket Server...");
 
@@ -183,6 +91,7 @@ try {
   //$global['forum'] = new Forum();
     $global['timeQ'] = time();
     $global['isBot'] = -1;
+    $global['isWSR'] = -1;
 
     $server = new swoole_websocket_server("127.0.0.1", 420);
 
@@ -384,6 +293,22 @@ $server->on('message', function(swoole_websocket_server $_server, $frame) {
 
                         $_server->push($frame->fd, $ret);
                     }
+                    if (strcmp($array['Message_Data']['data'], "WebSocketRelay") == 0) {
+                        
+                        $global['isWSR'] = $frame->fd;
+
+                        _sprintf("WebSocket Relay connected.");
+
+                        $ret = json_encode(
+                            array(
+                                'err' => 0,
+                                'msg' => "WebSocket Relay connected."
+                            ),
+                            true
+                        );
+
+                        $_server->push($frame->fd, $ret);
+                    }
                     break;
             }
             break;
@@ -505,8 +430,59 @@ $server->on('message', function(swoole_websocket_server $_server, $frame) {
             // todo 
             break;
 
+        case Message_Type::Vip_LoadUser:
+            $ret = array(
+                'Message_Type' => $array['Message_Type'],
+                'Message_Data' => $global['kxnrl']->Vip_LoadUser($array['Message_Data']['pid'])
+            );
+            break;
+
+        case Message_Type::Vip_LoadAll:
+            $ret = array(
+                'Message_Type' => $array['Message_Type'],
+                'Message_Data' => $global['kxnrl']->Vip_LoadAll()
+            );
+            break;
+
+        case Message_Type::Vip_FromClient:
+            // todo
+            break;
+
+        case Message_Type::Client_ForwardUser:
+            $ret = array(
+                'Message_Type' => $array['Message_Type'],
+                'Message_Data' => $array['Message_Data']
+            );
+            $json = json_encode($ret);
+            foreach ($_server->connections as $fd)
+            {
+                if ($global['isBot'] == $fd || $global['isWSR'] == $fd) {
+                    continue;
+                }
+                $_server->push($fd, $json);
+            }
+            break;
+
+        case Message_Type::Client_HeartBeat:
+            $ret = array(
+                'Message_Type' => $array['Message_Type'],
+                'Message_Data' => $array['Message_Data']
+            );
+            $json = json_encode($ret);
+            foreach ($_server->connections as $fd)
+            {
+                if ($$global['isWSR'] != $fd) {
+                    continue;
+                }
+                $_server->push($fd, $json);
+            }
+            break;
+
+        case Message_Type::Client_S2S:
+            $_server->push($frame->fd, json_encode($array));
+            break;
+
         case Message_Type::Stats_LoadUser:
-            _sprintf("LoadUser: " . $array['Message_Data']['steamid']);
             $ret = array(
                 'Message_Type' => $array['Message_Type'],
                 'Message_Data' => $global['kxnrl']->Stats_LoadUser($array['Message_Data']['steamid'])
@@ -579,7 +555,7 @@ $server->on('open', function(swoole_websocket_server $_server, swoole_http_reque
     _sprintf("Total connection: {$r}");
 });
 
-$server->on('close', function($_server, $fd) {
+$server->on('close', function(swoole_websocket_server $_server, $fd) {
     global $global, $authed;
     unset($authed[$fd]);
     $r = 0;
