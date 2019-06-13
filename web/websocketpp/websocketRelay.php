@@ -27,7 +27,11 @@ try {
     die();
 }
 
-$cli->on('message', function (swoole_http_client $_client, $frame) {
+$client->upgrade('/', function (swoole_http_client $_client) {
+    $_client->push("WebSocketRelay");
+});
+
+$client->on('message', function (swoole_http_client $_client, $frame) {
     
     global $server, $ipAdr;
 
