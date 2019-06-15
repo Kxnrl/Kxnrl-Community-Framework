@@ -434,6 +434,7 @@ $server->on('message', function(swoole_websocket_server $_server, $frame) {
                 'Message_Type' => $array['Message_Type'],
                 'Message_Data' => $global['kxnrl']->Vip_LoadUser($array['Message_Data']['pid'])
             );
+            $_server->push($frame->fd, json_encode($ret));
             break;
 
         case Message_Type::Vip_LoadAll:
@@ -441,6 +442,7 @@ $server->on('message', function(swoole_websocket_server $_server, $frame) {
                 'Message_Type' => $array['Message_Type'],
                 'Message_Data' => $global['kxnrl']->Vip_LoadAll()
             );
+            $_server->push($frame->fd, json_encode($ret));
             break;
 
         case Message_Type::Vip_FromClient:

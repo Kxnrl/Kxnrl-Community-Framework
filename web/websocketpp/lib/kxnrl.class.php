@@ -553,7 +553,7 @@ EOF
         $e = time() - 1;
         $l = 0;
 
-        if ($result = $this->db->query("SELECT * FROM `kcf_vip` WHERE `expired` > UNIX_TIMESTAMP() WHERE `pid` = '$p' LIMIT 1;")) {
+        if ($result = $this->db->query("SELECT * FROM `kcf_vip` WHERE `expired` > UNIX_TIMESTAMP() AND `pid` = '$p' LIMIT 1;")) {
 
             if ($row = $result->fetch_array(MYSQLI_ASSOC)) {
                 
@@ -572,6 +572,8 @@ EOF
                 'err'   => 'none'
             );
         }
+
+        _sprintf("Load: $p -> null result");
 
         _log("Vip_LoadUser: " . $this->db->error);
 
