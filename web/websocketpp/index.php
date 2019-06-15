@@ -118,20 +118,35 @@ $server->on('message', function(swoole_websocket_server $_server, $frame) {
     
     global $authed, $global, $_config;
 
-    //if ($frame->opcode == )
-
-    //_sprintf("=============[Received]=============");
-    //_sprintf("Data: {$frame->data}");
-
     $recv = $frame->data;
     if (!isset($authed[$frame->fd]['verify']) || !$authed[$frame->fd]['verify'])
     {
         if (strcmp($recv, $_config['pwkey']) != 0)
         {
+            if (strcmp($recv, "WebSocketRelay".$_config['pwkey']) == 0) {
+
+                $global['isWSR'] = $frame->fd;
+
+                _sprintf("Message Auth: {$frame->fd} √");
+                _sprintf("WebSocket Relay connected.");
+
+                $ret = json_encode(
+                    array(
+                        'err' => 0,
+                        'msg' => "WebSocket Relay connected."
+                    ),
+                    true
+                );
+
+                $_server->push($frame->fd, $ret);
+                return true;
+            }
+
             _sprintf("Message Auth: '{$recv}' X");
-            $_server->close($frame->fd, false);
+            $_server->disconnect($frame->fd, 1008, "Invalid Arguments");
             return false;
         }
+
         _sprintf("Message Auth: {$frame->fd} √");
         $authed[$frame->fd]['verify'] = true;
         return true;
@@ -169,7 +184,7 @@ $server->on('message', function(swoole_websocket_server $_server, $frame) {
             break;
 
         case Message_Type::Disconnect:
-            $_server->close($frame->fd, true);
+            $_server->disconnect($frame->fd, 1008, "Disconnected by Message Id.");
             break;
 
         case Message_Type::Server_Load:
@@ -287,22 +302,6 @@ $server->on('message', function(swoole_websocket_server $_server, $frame) {
                             array(
                                 'err' => 0,
                                 'msg' => "WebSocket connected."
-                            ),
-                            true
-                        );
-
-                        $_server->push($frame->fd, $ret);
-                    }
-                    if (strcmp($array['Message_Data']['data'], "WebSocketRelay") == 0) {
-                        
-                        $global['isWSR'] = $frame->fd;
-
-                        _sprintf("WebSocket Relay connected.");
-
-                        $ret = json_encode(
-                            array(
-                                'err' => 0,
-                                'msg' => "WebSocket Relay connected."
                             ),
                             true
                         );
@@ -572,6 +571,13 @@ $server->on('close', function(swoole_websocket_server $_server, $fd) {
         $global['isBot'] = -1;
 
         _msg("CQPBot disconnected.");
+    }
+
+    if ($global['isWSR'] == $fd)
+    {
+        $global['isWSR'] = -1;
+
+        _msg("WebsocketRelay disconnected.");
     }
 });
 

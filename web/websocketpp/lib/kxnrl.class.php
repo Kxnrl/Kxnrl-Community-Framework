@@ -746,19 +746,19 @@ EOF
         if ($t > 0) {
 
             if (!$this->db->query("UPDATE `kcf_analytics` SET `duration` = $d WHERE `aid` = $t AND `pid` = $p;") || $this->db->affected_rows == 0) {
-                _log("Stats_Update: Failed to update kcf_analytics -> $t:$p:$d -> \n```sql\n" . $this->db->error . "\n```");
+                _log("Stats_Update: Failed to update kcf_analytics -> $t:$p:$d -> " . $this->db->error . "\n```sql\n" . "UPDATE `kcf_analytics` SET `duration` = $d WHERE `aid` = $t AND `pid` = $p;" . "\n```");
             }
         }
 
         if ($o > 0 || $s > 0 || $a > 0) {
             
             if (!$this->db->query("UPDATE `kcf_stats` SET `playtotal`=`playtotal`+$o, `spectotal`=`spectotal`+$s, `alivetime`=`alivetime`+$a WHERE `pid` = $p;") || $this->db->affected_rows == 0) {
-                _log("Stats_Update: Failed to update kcf_stats -> $t:$p:$d -> \n```sql\n" . $this->db->error . "\n```");
+                _log("Stats_Update: Failed to update kcf_stats -> $t:$p:$d -> " . $this->db->error . "\n```sql\n" . "UPDATE `kcf_stats` SET `playtotal`=`playtotal`+$o, `spectotal`=`spectotal`+$s, `alivetime`=`alivetime`+$a WHERE `pid` = $p;" . "\n```");
             }
         }
 
         if (!$this->db->query("UPDATE `kcf_players` SET `connections`=`connections`+1, `onlinetimes`=`onlinetimes`+$d WHERE `pid` = $p;") || $this->db->affected_rows == 0) {
-            _log("Stats_Update: Failed to update kcf_stats -> $p:$d -> \n```sql\n" . $this->db->error . "\n```");
+            _log("Stats_Update: Failed to update kcf_stats -> $t:$p:$d -> " . $this->db->error . "\n```sql\n" . "UPDATE `kcf_players` SET `connections`=`connections`+1, `onlinetimes`=`onlinetimes`+$d WHERE `pid` = $p;" . "\n```");
         }
     }
 
