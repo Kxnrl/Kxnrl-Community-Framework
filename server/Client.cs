@@ -1,10 +1,10 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Threading;
 using WebSocketSharp;
 using WebsocketRelay.IProtocol;
 using static WebsocketRelay.Program;
+using System.Timers;
 
 namespace WebsocketRelay
 {
@@ -19,12 +19,13 @@ namespace WebsocketRelay
         public string KeyChain;
 
         const uint Client_ForwardUser = 701;
-        const uint Client_HeartBeat   = 702;
-        const uint Client_S2S         = 703;
+        const uint Client_HeartBeat = 702;
+        const uint Client_S2S = 703;
 
         private WebSocket client;
         private bool AutoReconnect;
         public bool WasAuthorized;
+        private Timer timer;
 
         private static Server relay;
         public static Server RelayProxy { set => relay = value; }
@@ -35,13 +36,14 @@ namespace WebsocketRelay
         public void DisconnectAsync() => client.CloseAsync(CloseStatusCode.Normal, "Exited");
         public void Send(string data) => client.Send(data);
         public void SendAsync(string data, Action<bool> completed) => client.SendAsync(data, completed);
+        public void Dispose() => timer.Dispose();
 
         public Client(WebsocketSchema schema, string url, ushort port, bool autoReconnect = true, string sslhost = null)
         {
             client = new WebSocket(Enum.GetName(typeof(WebsocketSchema), schema).ToLower() + "://" + url.TrimEnd('/') + ":" + port)
             {
                 Compression = CompressionMethod.Deflate,
-                EmitOnPing = true,
+                EmitOnPing = false,
                 WaitTime = TimeSpan.FromSeconds(15)
             };
 
@@ -58,6 +60,24 @@ namespace WebsocketRelay
             client.OnMessage += ClientHandler_OnMessage;
 
             AutoReconnect = autoReconnect;
+
+            timer = new Timer
+            {
+                AutoReset = true,
+                Enabled = true,
+                Interval = 30000
+            };
+            timer.Elapsed += Event_OnTimer;
+            timer.Start();
+        }
+
+        private void Event_OnTimer(object sender, ElapsedEventArgs e)
+        {
+            if (client.ReadyState == WebSocketState.Open)
+            {
+                client.Ping();
+                AppendLog(ConsoleColor.Cyan, "[Client] KeepAlive...");
+            }
         }
 
         #region Connection Handler
@@ -74,7 +94,7 @@ namespace WebsocketRelay
 
             if (AutoReconnect)
             {
-                Thread.Sleep(3000);
+                System.Threading.Thread.Sleep(3000);
                 client.ConnectAsync();
             }
         }

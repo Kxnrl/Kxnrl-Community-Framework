@@ -103,6 +103,7 @@ namespace WebsocketRelay
             while(Console.ReadKey(true).Key != ConsoleKey.Escape)
             {
                 Client.Disconnect();
+                Client.Dispose();
                 Server.Stop();
                 Environment.Exit(0);
             }
