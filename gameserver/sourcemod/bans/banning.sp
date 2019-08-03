@@ -166,6 +166,7 @@ void BanSys_OnIdentityBan()
     {
         char kick[256];
         FormatEx(kick, 256, "您已被服务器封锁,禁止进入游戏!\n类型: %s    到期: %s\n原因: %s", g_banType[type], timeExpired, reason);
+        PrintToConsole(client, " \n\n\n\n\n%s\n\n", kick);
         BanClient(target, len, BANFLAG_AUTHID, reason, kick);
         ChatAll("{red}%N{white} 已被服务器封禁. ", target);
         SMUtils_SkipNextPrefix();
